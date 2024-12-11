@@ -1,0 +1,33 @@
+# --------------------------
+#
+#	Multistage
+#
+# --------------------------
+#
+# stage 1 build
+# docker build -t mygolang:v.23.3 .
+#
+#
+
+FROM golang:1.23.3-bookworm AS build
+
+COPY ./golangwebapp/* /golangwebapp
+
+WORKDIR /golangwebapp
+
+RUN go build
+
+#
+# docker build -t gorun:v1 .
+#
+# stage 2 running
+
+FROM kalilinux/kali-rolling
+
+COPY --from=build /golangwebapp/webappdemo /app/webappdemo
+
+WORKDIR /app
+
+EXPOSE 8080
+
+CMD ["./webappdemo"]

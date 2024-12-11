@@ -1,0 +1,37 @@
+# ----------
+# Dockerfile
+# ----------
+#
+# docker search
+# docker pull <konténer_id>
+#
+# docker exec -it fedora01 /bin/bash
+#
+# docker images
+# docker ps -a
+# docker rmi IMAGEID
+# docker rm CONTAINERID
+#
+# docker pull fedora:latest
+#
+# docker build -t myfedora:v1 .
+# docker create -it -v /home/admin:/shared --name fedora01 --hostname fedora01 myfedora:v1
+# docker start fedora01
+# docker attach fedora01
+#
+#
+
+FROM fedora:latest
+
+ADD dnf.conf /etc/dnf/dnf.conf
+ADD run.sh /run.sh
+
+RUN dnf update -y && dnf install openssh-server procps-ng -y
+RUN mkdir -p /var/run/ssh
+RUN ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key -N ''
+
+RUN mkdir -p /shared
+
+#VOLUME ["/home/admin":"/shared"]
+
+ENTRYPOINT ["/usr/sbin/sshd","-D"]

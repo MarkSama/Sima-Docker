@@ -1,0 +1,53 @@
+# ----------
+# Dockerfile
+# ----------
+#
+# docker search
+# docker pull <konténer_id>
+#
+# docker exec -it fedora01 /bin/bash
+#
+# docker images
+# docker ps -a
+# docker rmi IMAGEID
+# docker rm CONTAINERID
+#
+# docker pull fedora:latest
+#
+# docker build -t myfedora-mysql:v1 -f Dockerfile4 .
+# docker create -it -v /home/admin:/shared --name fedora03-httpd --hostname fedora03 myfedora:v1
+# docker start fedora01
+# docker attach fedora01
+#
+#
+
+FROM fedora:latest
+
+ADD dnf.conf /etc/dnf/dnf.conf
+
+
+RUN dnf update -y && dnf install openssh-server procps-ng iputils iproute net-tools coreutils community-mysql community-mysql-server -y 
+#RUN mkdir -p /var/run/mysqld /var/lib/mysql && chown -R mysql:mysql /var/run/mysqld /var/lib/mysql
+RUN ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key -N ''
+RUN setcap -r /usr/libexec/mysqld
+RUN mysqld_pre_systemd 
+
+
+RUN echo "bind-address=0.0.0.0" >> /etc/my.cnf.d/mysql-server.cnf 
+
+#RUN adduser mysql
+
+#ENV MYSQL_USER=admin
+#ENV MYSQL_PASSWORD=admin
+#ENV MYSQL_DATABASE=my_database
+
+
+
+RUN mkdir -p /shared
+
+EXPOSE 3306 80 443 22
+
+#VOLUME ["/home/admin":"/shared"]
+
+#ENTRYPOINT ["mysqld","-u","root"]
+ENTRYPOINT ["mysqld","-u","mysql"]

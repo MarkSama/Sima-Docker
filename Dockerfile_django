@@ -1,0 +1,44 @@
+# ----------
+# Dockerfile
+# ----------
+#
+# docker search
+# docker pull <konténer_id>
+#
+# docker exec -it fedora01 /bin/bash
+#
+# docker images
+# docker ps -a
+# docker rmi IMAGEID
+# docker rm CONTAINERID
+#
+# docker pull fedora:latest
+#
+# docker build -t myfedora-django:v1 -f .
+# docker create -it -v /home/admin:/shared -p 8000:8000 --name fedora-dj --hostname fedora-dja myfedora-django:v1
+# docker start fedora-dj
+# docker attach fedora-dj
+#
+#
+
+FROM fedora:latest
+
+# proxy ez itt alul
+ADD dnf.conf /etc/dnf/dnf.conf
+
+
+RUN dnf update -y && dnf install openssh-server procps-ng iputils iproute net-tools httpd coreutils python3 pip -y 
+
+RUN mkdir -p /shared
+
+ADD djangoproj.tar.gz /
+WORKDIR /djangoproj
+
+RUN pip install --proxy http://10.0.0.2:3128 -r requirements.txt
+
+
+EXPOSE 8000
+
+#VOLUME ["/home/admin":"/shared"]
+
+ENTRYPOINT ["python3","manage.py","runserver","0.0.0.0:8000"]
